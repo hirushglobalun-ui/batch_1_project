@@ -1,0 +1,36 @@
+services:
+  # Backend Web Service
+  - type: web
+    name: fullstack-api
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: PORT
+        value: 10000 # Render's default port
+
+  # Frontend Static Site
+  - type: static
+    name: fullstack-frontend
+    env: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: fullstack-api
+          property: host
+        suffix: /api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
